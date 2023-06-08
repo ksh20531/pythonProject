@@ -10,29 +10,24 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
+# 골프장 자동 선택
 def makeTarget():
-    data = {}
     now = datetime.now()
-    nine = datetime(now.year, now.month, now.day, 9, 00)
+    first_time = datetime(now.year, now.month, now.day, 9, 00)
+    second_time = datetime(now.year, now.month, now.day, 9, 30)
 
-    if nine > now:
-        nine = datetime(now.year, now.month, now.day, 9, 30)
-        data[0] = sunV.ilJuk
-        data[1] = sunV.timeIljuk
-
-        if nine > now:
-            nine = datetime(now.year, now.month, now.day, 10, 30)
-        data[0] = sunV.yeoJu
-        data[1] = sunV.timeYeoju
-    else:
-        data[0] = sunV.sulAk
-        data[1] = sunV.timeSulak
-        return data
+    if first_time > now:
+        return sunV.sulAk
+    elif first_time < now < second_time:
+        return sunV.ilJuk
+    elif second_time < now:
+        return sunV.yeoJu
 
 
-target = makeTarget()[0]
-targetTime = datetime.strptime(makeTarget()[1], '%H:%M:%S').time()
-print(type(targetTime), "targetTime :", targetTime)
+makeTarget = makeTarget()
+target = makeTarget['code']
+targetTime = datetime.strptime(makeTarget['time'], '%H:%M:%S').time()
+print(makeTarget)
 
 # ssl 오류 발생 방지용
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -46,7 +41,6 @@ driver.implicitly_wait(10)  # 페이지 로드 시간 옵션
 
 # 페이지 오픈
 driver.get(sunV.url_login)
-
 
 # 아이디,비밀번호 입력 후 로그인 클릭
 driver.find_element(By.ID, "usrId").send_keys(sunV.my_id)
@@ -73,15 +67,18 @@ except:
 # 예약 페이지로 이동
 driver.get(sunV.url_reservation)
 print("move to reserve page")
-driver.find_element(By.ID, sunV.btnId + target).click()
+driver.find_element(By.ID, 'selectCoId' + target).click()
 print("move to target")
 
 # 예약시간 timer
+timeRange = sunV.timeRange
+reserveTime = datetime.strptime(sunV.reserveTime, '%H:%M:%S')  # datetime.datetime
+
 while True:
-    date = datetime.now().strftime('%H:%M:%S')
-    time = datetime.strptime(date, '%H:%M:%S').time()
+    date = datetime.now().strftime('%H:%M:%S')  # str
+    time = datetime.strptime(date, '%H:%M:%S').time()  # datetime.time
     sleep(0.5)
-    print('type :', type(time), "time : ", time)
+    print("time : ", time)
 
     if time == targetTime:
         driver.refresh()
@@ -94,7 +91,7 @@ while True:
             except:
                 date = "B"+sunV.reserveDate
 
-            print('selected date is ',date)
+            print('selected date is ', date)
             driver.find_element(By.ID, date).click()
         else:
             print("date select error")
@@ -105,26 +102,28 @@ while True:
 
         if req2.status_code == 200:
             elements = driver.find_elements(By.CSS_SELECTOR, '#tabCourseALL > div > div > table > tbody > tr')
-            reserveTime = datetime.strptime(sunV.reserveTime, '%H:%M:%S')
 
             for e in elements:
                 # 예약 시간 datetime형식으로 변환 범위 계산
-                resTime = datetime.strptime(e.text.split(' ')[3], '%H:%M')
-                diff = resTime - reserveTime
+                resTime = datetime.strptime(e.text.split(' ')[3], '%H:%M') # 문자열을 datetime로 변환
+                diff = resTime - reserveTime  # second
                 diff = int(diff.seconds / 60)  # second to minute
 
                 # 예약시간 이상이고, 범위 안에 들었을 경우
-                if (resTime >= reserveTime and diff <= sunV.timeRange):
+                if (resTime >= reserveTime and diff <= timeRange):
                     if e.text.find('마감') < 0:
                         e.find_element(By.CLASS_NAME, 'btn-res').click()
                         print("move to select page")
                         break
+                    else:
+                        print("full booking")
+
             try:
                 driver.find_element(By.CLASS_NAME, 'btn-res03').click()
-                print('success')
+                print('성공')
+                break
             except:
-                print('fail')
+                print('실패')
                 pass
-        break
 
 print("program end")

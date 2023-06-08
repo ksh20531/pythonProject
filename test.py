@@ -6,6 +6,22 @@ import ssl
 from pytz import timezone, utc
 import threading
 
+reserveTime = datetime.strptime(sunV.reserveTime, '%H:%M:%S')  # datetime.datetime
+date = datetime.now().strftime('%H:%M:%S')  # str
+time = datetime.strptime(date, '%H:%M:%S').time()  # datetime.time
+print(type(reserveTime), reserveTime)
+print(type(date), date)
+print(type(time), time)
+
+
+print(type(reserveTime), reserveTime)
+
+# resTime = datetime.strptime('11:41', '%H:%M')  # 문자열을 datetime로 변환
+# diff = resTime - reserveTime
+# diff = int(diff.seconds / 60)  # second to minute
+#
+# print(type(diff), diff)
+
 
 # date = datetime.now().strftime('%H:%M:%S')
 # time = datetime.strptime(date, '%H:%M:%S').time()
