@@ -1,9 +1,11 @@
 import sunVally_config as sunV
 import ssl
 import requests
+from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 from time import sleep
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -35,7 +37,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # 크롬 브라우저 꺼짐 방지 옵션
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-driver = webdriver.Chrome(options=chrome_options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 driver.maximize_window()  # 창 최대화 옵션
 driver.implicitly_wait(10)  # 페이지 로드 시간 옵션
 
@@ -86,13 +88,13 @@ while True:
         # 날짜 선택
         req = requests.get(sunV.url_reservation + '?sel=' + target)
         if req.status_code == 200:
+            date = "A"+sunV.reserveDate
             try:
-                date = "A"+sunV.reserveDate
+                driver.find_element(By.ID, date).click()
             except:
                 date = "B"+sunV.reserveDate
-
+                driver.find_element(By.ID, date).click()
             print('selected date is ', date)
-            driver.find_element(By.ID, date).click()
         else:
             print("date select error")
 
