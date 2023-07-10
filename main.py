@@ -116,7 +116,6 @@ while True:
                     if e.text.find('마감') < 0:
                         e.find_element(By.CLASS_NAME, 'btn-res').click()
                         print("move to select page")
-                        break
                     else:
                         print("full booking")
 
