@@ -3,7 +3,6 @@ import sunVally_config as sunV
 from time import sleep
 import urllib.request
 import ssl
-from pytz import timezone, utc
 import threading
 
 reserveTime = datetime.strptime(sunV.reserveTime, '%H:%M:%S')  # datetime.datetime

@@ -88,7 +88,8 @@ while True:
         # 날짜 선택
         req = requests.get(sunV.url_reservation + '?sel=' + target)
         if req.status_code == 200:
-            date = "A"+sunV.reserveDate
+            # date = "A"+sunV.reserveDate
+            date = "B"+sunV.reserveDate
             try:
                 driver.find_element(By.ID, date).click()
             except:
