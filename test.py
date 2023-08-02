@@ -5,15 +5,68 @@ import urllib.request
 import ssl
 import threading
 
-reserveTime = datetime.strptime(sunV.reserveTime, '%H:%M:%S')  # datetime.datetime
-date = datetime.now().strftime('%H:%M:%S')  # str
-time = datetime.strptime(date, '%H:%M:%S').time()  # datetime.time
-print(type(reserveTime), reserveTime)
-print(type(date), date)
-print(type(time), time)
+# now = datetime.now()
+d = ['13:15','12:00','14:13']
+
+reserveTime = datetime.strptime(sunV.test['reserveDatetime'], '%Y-%m-%d %H:%M:%S')  # datetime.datetime
+resTime = datetime.strptime(str(reserveTime.date()) + ' ' + d[0], '%Y-%m-%d %H:%M')
+
+print(reserveTime)
+print(resTime)
+
+diff = resTime - reserveTime  # second
+diff = int(diff.seconds / 60)  # second to minute
+print(diff)
+# 예약시간 이상이고, 범위 안에 들었을 경우
+if (resTime >= reserveTime and diff <= sunV.timeRange):
+    print("test")
 
 
-print(type(reserveTime), reserveTime)
+# time = d[0].split(':')
+#
+# now = str(datetime.now().date())
+# # print(type(now), now)
+# #
+# # now2 = str(datetime.now().date()) + ' ' + d[0]
+# # print(type(now2), now2)
+# #
+# # resTime = datetime.strptime(now2, '%Y-%m-%d %H:%M') # 문자열을 datetime로 변환
+# # print(type(resTime), resTime)
+# #
+# resTime2 = datetime.strptime(now+' '+d[0], '%Y-%m-%d %H:%M') # 문자열을 datetime로 변환
+# print(type(resTime2), resTime2)
+
+
+
+
+# targetTime = datetime.strptime(sunV.test['time'], '%H:%M:%S')
+# print(type(targetTime),targetTime)
+#
+# while True:
+#     now = datetime.now()
+#     dd = (targetTime - now).total_seconds()
+#     print(dd)
+#     if dd < 0.20000:
+#         print("end")
+#         break
+
+
+
+# reserveTime = datetime.strptime(sunV.reserveTime, '%H:%M:%S')  # datetime.datetime
+# date = datetime.now().strftime('%H:%M:%S')  # str
+# time = datetime.strptime(date, '%H:%M:%S').time()  # datetime.time
+# print(type(reserveTime), reserveTime)
+# print(type(date), date)
+# print(type(time), time)
+#
+#
+# print(type(reserveTime), reserveTime)
+
+
+
+
+
+
 
 # resTime = datetime.strptime('11:41', '%H:%M')  # 문자열을 datetime로 변환
 # diff = resTime - reserveTime

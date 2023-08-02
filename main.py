@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # 골프장 자동 선택
 def makeTarget():
+    # return sunV.test
     now = datetime.now()
     first_time = datetime(now.year, now.month, now.day, 9, 00)
     second_time = datetime(now.year, now.month, now.day, 9, 30)
@@ -24,12 +25,20 @@ def makeTarget():
         return sunV.ilJuk
     elif second_time < now:
         return sunV.yeoJu
+    else:
+        return sunV.test
 
 
 makeTarget = makeTarget()
 target = makeTarget['code']
-targetTime = datetime.strptime(makeTarget['time'], '%H:%M:%S').time()
+startTime = datetime.strptime(str(datetime.now().date()) + " " + makeTarget['time'], '%Y-%m-%d %H:%M:%S')
+targetDatetime = datetime.strptime(makeTarget['reserveDatetime'], '%Y-%m-%d %H:%M:%S')
 print(makeTarget)
+
+if targetDatetime.month == datetime.now().month:
+    selectedDate = "A" + format(targetDatetime.year, '04') + format(targetDatetime.month, '02') + format(targetDatetime.day, '02')
+else:
+    selectedDate = "B" + format(targetDatetime.year, '04') + format(targetDatetime.month, '02') + format(targetDatetime.day, '02')
 
 # ssl 오류 발생 방지용
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -37,6 +46,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # 크롬 브라우저 꺼짐 방지 옵션
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
+# https://chromedriver.chromium.org/downloads
+# driver = webdriver.Chrome(service=Service(ChromeDriverManager(version='114.0.5735.90').install()), options=chrome_options)
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 driver.maximize_window()  # 창 최대화 옵션
 driver.implicitly_wait(10)  # 페이지 로드 시간 옵션
@@ -74,30 +85,21 @@ print("move to target")
 
 # 예약시간 timer
 timeRange = sunV.timeRange
-reserveTime = datetime.strptime(sunV.reserveTime, '%H:%M:%S')  # datetime.datetime
+reserveTime = datetime.strptime(makeTarget['reserveDatetime'], '%Y-%m-%d %H:%M:%S')  # datetime.datetime
 
 while True:
-    date = datetime.now().strftime('%H:%M:%S')  # str
-    time = datetime.strptime(date, '%H:%M:%S').time()  # datetime.time
-    sleep(0.5)
-    print("time : ", time)
-
-    if time == targetTime:
+    start = (startTime - datetime.now()).total_seconds()
+    if start < 0.2:
         driver.refresh()
-
+        print('----------start----------')
         # 날짜 선택
         req = requests.get(sunV.url_reservation + '?sel=' + target)
         if req.status_code == 200:
-            # date = "A"+sunV.reserveDate
-            date = "B"+sunV.reserveDate
-            try:
-                driver.find_element(By.ID, date).click()
-            except:
-                date = "B"+sunV.reserveDate
-                driver.find_element(By.ID, date).click()
-            print('selected date is ', date)
+            driver.find_element(By.ID, selectedDate).click()
+            print('selected date is ', selectedDate)
         else:
             print("date select error")
+            break
 
         # 시간 선택
         req2 = requests.get(sunV.url_ajax)
@@ -108,24 +110,26 @@ while True:
 
             for e in elements:
                 # 예약 시간 datetime형식으로 변환 범위 계산
-                resTime = datetime.strptime(e.text.split(' ')[3], '%H:%M') # 문자열을 datetime로 변환
-                diff = resTime - reserveTime  # second
-                diff = int(diff.seconds / 60)  # second to minute
-
-                # 예약시간 이상이고, 범위 안에 들었을 경우
-                if (resTime >= reserveTime and diff <= timeRange):
-                    if e.text.find('마감') < 0:
+                if e.text.find('마감') < 0:
+                    targetTime = datetime.strptime(str(reserveTime.date()) + ' ' + e.text.split(' ')[3], '%Y-%m-%d %H:%M')
+                    diff = targetTime - reserveTime  # second
+                    diff = int(diff.seconds / 60)  # second to minute
+                    # 예약시간 이상이고, 범위 안에 들었을 경우
+                    if (targetTime >= reserveTime and diff <= timeRange):
                         e.find_element(By.CLASS_NAME, 'btn-res').click()
                         print("move to select page")
-                    else:
-                        print("full booking")
+                        break
 
+                    else:
+                        print("is booked")
             try:
                 driver.find_element(By.CLASS_NAME, 'btn-res03').click()
                 print('성공')
                 break
             except:
-                print('실패')
-                pass
+                print('동시 예약')
+            break
+        else:
+            print('communication error')
 
 print("program end")
