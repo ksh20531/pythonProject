@@ -3,14 +3,14 @@ import ssl
 import requests
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
-from time import sleep
+import webbrowser
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+import os
 
 # 골프장 자동 선택
 def makeTarget():
@@ -46,9 +46,17 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # 크롬 브라우저 꺼짐 방지 옵션
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-# https://chromedriver.chromium.org/downloads
-# driver = webdriver.Chrome(service=Service(ChromeDriverManager(version='114.0.5735.90').install()), options=chrome_options)
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+try:
+    # https://chromedriver.chromium.org/downloads
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+except:
+    webbrowser.open("https://googlechromelabs.github.io/chrome-for-testing/")
+    path = os.getcwd()
+    print(path)
+    os.startfile(path)
+    # driver = webdriver.Chrome(path+'/chromedriver.exe', options=chrome_options)
+    exit()
+
 driver.maximize_window()  # 창 최대화 옵션
 driver.implicitly_wait(10)  # 페이지 로드 시간 옵션
 
