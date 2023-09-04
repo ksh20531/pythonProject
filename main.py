@@ -50,12 +50,12 @@ try:
     # https://chromedriver.chromium.org/downloads
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 except:
-    webbrowser.open("https://googlechromelabs.github.io/chrome-for-testing/")
+    # webbrowser.open("https://googlechromelabs.github.io/chrome-for-testing/")
     path = os.getcwd()
     print(path)
     os.startfile(path)
-    # driver = webdriver.Chrome(path+'/chromedriver.exe', options=chrome_options)
-    exit()
+    driver = webdriver.Chrome(path+'/chromedriver.exe', options=chrome_options)
+    # exit()
 
 driver.maximize_window()  # 창 최대화 옵션
 driver.implicitly_wait(10)  # 페이지 로드 시간 옵션
