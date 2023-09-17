@@ -131,10 +131,12 @@ while True:
                     else:
                         print("is booked")
             try:
-                driver.find_element(By.CLASS_NAME, 'btn-res03').click()
+                btn = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "btn-res03")))
+                btn.click()
                 print('성공')
                 break
             except:
+                driver.find_element(By.CLASS_NAME, 'btn-res03').click()
                 print('동시 예약')
             break
         else:
